@@ -3,64 +3,71 @@ from tkinter import ttk
 from pony.orm import *
 import random
 
-
-# Database setup
-db = Database()
-db.bind(provider='sqlite', filename='database.sqlite', create_db=True)
-
-
-class Vocab(db.Entity):
-    native = Required(str)
-    target = Optional(str)
-    usage_note = Optional(str)
-    transliteration = Optional(str)
-    # PROPERTIES TO FILL ONE_BY_ONE
-    # word_type is picked from a list at front_end
-    word_type = Required(str, default='misc')
-    antonyms = Set('Vocab', reverse='antonyms')
-    synonyms = Set('Vocab', reverse='synonyms')
-    siblings = Set('Vocab', reverse='siblings')
-    parents = Set('Vocab', reverse='children')
-    children = Set('Vocab', reverse='parents')
-    take_emotional_judgement = Optional(str)
-    take_last_seen = Optional(str)
-    take_closest_occurrence = Optional(str)
-    pronunciations = Set('AudioFile')
-    images = Set('ImageFile')
-    drawing = Optional('DrawingFile')
-    # misc
-    learn_notes = Set('LearnNote')
-
-class AudioFile(db.Entity):
-    path = Required(str)
-    vocab = Required('Vocab')
-
-class ImageFile(db.Entity):
-    path = Required(str)
-    vocab = Required('Vocab')
-
-class DrawingFile(db.Entity):
-    path = Required(str)
-    vocab = Required('Vocab')
-
-class LearnNote(db.Entity):
-    based_on = Set('Vocab')
-    # possible type is defined at front end
-    note_type = Required(str)
-    title = Required(str)
-    content = Required(str)
-    batch = Required('Batch')
-
-class Batch(db.Entity):
-    # numbering conveniently done by pony :)
-    notes = Set('LearnNote')
-
-db.generate_mapping(create_tables=True)
-
 # Application setup
 class App(tk.Tk):
+    def define_entities(self):
+        class Vocab(self.db.Entity):
+            native = Required(str)
+            target = Optional(str)
+            usage_note = Optional(str)
+            transliteration = Optional(str)
+            # PROPERTIES TO FILL ONE_BY_ONE
+            # word_type is picked from a list at front_end
+            word_type = Required(str, default='misc')
+            antonyms = Set('Vocab', reverse='antonyms')
+            synonyms = Set('Vocab', reverse='synonyms')
+            siblings = Set('Vocab', reverse='siblings')
+            parents = Set('Vocab', reverse='children')
+            children = Set('Vocab', reverse='parents')
+            take_emotional_judgement = Optional(str)
+            take_last_seen = Optional(str)
+            take_closest_occurrence = Optional(str)
+            pronunciations = Set('AudioFile')
+            images = Set('ImageFile')
+            drawing = Optional('DrawingFile')
+            # misc
+            learn_notes = Set('LearnNote')
+
+        class AudioFile(self.db.Entity):
+            path = Required(str)
+            vocab = Required('Vocab')
+
+        class ImageFile(self.db.Entity):
+            path = Required(str)
+            vocab = Required('Vocab')
+
+        class DrawingFile(self.db.Entity):
+            path = Required(str)
+            vocab = Required('Vocab')
+
+        class LearnNote(self.db.Entity):
+            based_on = Set('Vocab')
+            # possible type is defined at front end
+            note_type = Required(str)
+            title = Required(str)
+            content = Required(str)
+            batch = Required('Batch')
+
+        class Batch(self.db.Entity):
+            # numbering conveniently done by pony :)
+            notes = Set('LearnNote')
+
+        self.db.generate_mapping(create_tables=True)
+
+
     def __init__(self):
         super().__init__()
+
+        self.db = Database()
+        self.db.bind(provider="sqlite", filename="database.sqlite", create_db=True)
+        self.define_entities()
+
+        self.render_screen()
+
+
+
+    @db_session
+    def render_screen(self):
         self.title("Language Learning App")
         
         # Set up the theme
@@ -85,9 +92,9 @@ class App(tk.Tk):
 
     @db_session
     def load_random_record(self):
-        records = select(v for v in Vocab)[:]
-        if records:
-            self.current_record = random.choice(records)
+        self.records = select(v for v in self.db.Vocab)[:]
+        if self.records:
+            self.current_record = random.choice(self.records)
             self.native_label.config(text=self.current_record.native)
             self.translation_entry.delete(0, tk.END)
         else:
