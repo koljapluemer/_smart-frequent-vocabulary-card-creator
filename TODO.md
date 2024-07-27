@@ -1,1 +1,1 @@
-- kill magic string file paths from main.py
+- find out how I prevent having to duplicate my db class file in all python files where I want to access the DB 
