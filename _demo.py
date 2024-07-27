@@ -1,8 +1,5 @@
 import dearpygui.dearpygui as dpg
-import os
-import random
 
-DATA_FILE = "data/en_frequent_words.txt"
 
 
 def main():
@@ -11,10 +8,11 @@ def main():
     dpg.create_viewport(title='Smart Frequent Vocabulary Card Creator', width=600, height=300)
 
     with dpg.window(label="Example Window", tag="Primary Window"):
-        word = get_random_new_word()
-        dpg.add_text("Find the translation of this word in your target language:")
+        dpg.add_text("Find the translation for this word:")
         dpg.add_text(word)
-
+        dpg.add_button(label="Save")
+        dpg.add_input_text(label="string", default_value="Quick brown fox")
+        dpg.add_slider_float(label="float", default_value=0.273, max_value=1)
 
     dpg.setup_dearpygui()
     dpg.show_viewport()
@@ -24,15 +22,10 @@ def main():
 
 
 
-# return a random word (line) from data/en_frquent_words
-def get_random_new_word():
-    with open(DATA_FILE, 'r') as f:
-        data = f.read()
-
-    words = data.split("\n")
-    return random.choice(words)
 
 
-
+# exectute main:
 if __name__ == '__main__':
     main()
+
+
