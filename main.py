@@ -8,12 +8,22 @@ DATA_FILE = "data/en_frequent_words.txt"
 def main():
 
     dpg.create_context()
-    dpg.create_viewport(title='Smart Frequent Vocabulary Card Creator', width=600, height=300)
+    # add a font registry
+    with dpg.font_registry():
+        # first argument ids the path to the .ttf or .otf file
+        font_text = dpg.add_font("assets/fonts/Roboto_Condensed/RobotoCondensed-Regular.ttf", 32)
+        font_text_large = dpg.add_font("assets/fonts/Roboto_Condensed/RobotoCondensed-Medium.ttf", 64)
+
+    dpg.create_viewport(title='Smart Frequent Vocabulary Card Creator', width=1000, height=600)
 
     with dpg.window(label="Example Window", tag="Primary Window"):
+        dpg.bind_font(font_text)
+
         word = get_random_new_word()
         dpg.add_text("Find the translation of this word in your target language:")
-        dpg.add_text(word)
+        word_label = dpg.add_text(word)
+        dpg.bind_item_font(word_label, font_text_large)
+
 
 
     dpg.setup_dearpygui()
