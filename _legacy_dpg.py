@@ -4,7 +4,9 @@ import random
 from pathlib import Path
 
 from PIL import ImageGrab
+import PIL
 import uuid
+import numpy
 
 
 DATA_FILE = "data/en_frequent_words.txt"
@@ -28,11 +30,19 @@ def get_random_new_word():
     words = data.split("\n")
     return random.choice(words)
 
+def paint_image(img_path):
+    width, height, channels, data = dpg.load_image(img_path)
+    with dpg.texture_registry(show=True):
+        dpg.add_static_texture(width=width, height=height, default_value=data, tag="texture_tag")
+        dpg.add_image("texture_tag")
+
 def grab_translation_image_from_clipboard():
     try:
         im = ImageGrab.grabclipboard()
         Path("user/images").mkdir(parents=True, exist_ok=True)
-        im.save(f'user/images/{word}-{uuid.uuid4()}.png')
+        img_path = f'user/images/{word}-{uuid.uuid4()}.png'
+        im.save(img_path)
+        paint_image(img_path)
     except Exception as e:
         print('Grabbing Image from Clipboard Failed:', e)
 
