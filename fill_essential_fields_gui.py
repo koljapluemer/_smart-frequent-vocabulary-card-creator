@@ -88,11 +88,40 @@ class App(tk.Tk):
         self.native_label.pack(padx=20, pady=20)
 
         self.translation_label = ttk.Label(self, text="Translation:")
-        self.translation_label.pack(padx=20, pady=20)
+        self.translation_label.pack(padx=20, pady=5)
 
         self.translation_entry = ttk.Entry(self, font=("Helvetica", 18))
         self.translation_entry.pack(padx=20, pady=20)
 
+
+        self.pronunciation_label = ttk.Label(self, text="Pronunciation:")
+        self.pronunciation_label.pack(padx=20, pady=5)
+
+        self.pronunciation_entry = ttk.Entry(self, font=("Helvetica", 18))
+        self.pronunciation_entry.pack(padx=20, pady=20)
+
+        # notes (bigger text field)
+        self.notes_label = ttk.Label(self, text="Usage Notes:")
+        self.notes_label.pack(padx=20, pady=5)
+
+        self.notes_entry = tk.Text(self, font=("Helvetica", 18), height=5, width=40)
+        self.notes_entry.pack(padx=20, pady=20)
+
+
+        # type of word
+        self.word_type = tk.StringVar(None, "misc")
+        self.r1 = ttk.Radiobutton(self, text='Noun', value='noun', variable=self.word_type)
+        self.r2 = ttk.Radiobutton(self, text='Verb', value='verb', variable=self.word_type)
+        self.r3 = ttk.Radiobutton(self, text='Adjective/Adverb', value='ad', variable=self.word_type)
+        self.r4 = ttk.Radiobutton(self, text='Other', value='misc', variable=self.word_type)
+
+        self.r1.pack()
+        self.r2.pack()
+        self.r3.pack()
+        self.r4.pack()
+
+
+        # Buttons
         self.save_button = ttk.Button(self, text="Save and Next", command=self.save_and_next)
         self.save_button.pack(padx=20, pady=20)
         
@@ -104,8 +133,15 @@ class App(tk.Tk):
         records = Vocab.select()
         if records:
             self.current_record = random.choice(records)
+            # fill in values from record or delete
             self.native_label.config(text=self.current_record.native)
             self.translation_entry.delete(0, tk.END)
+            self.translation_entry.insert(0, self.current_record.target or "")
+            self.pronunciation_entry.delete(0, tk.END)
+            self.pronunciation_entry.insert(0, self.current_record.transliteration or "")
+            self.notes_entry.delete("1.0", tk.END)
+            self.notes_entry.insert("1.0", self.current_record.usage_note or "")
+            self.word_type.set(self.current_record.word_type or "misc")
         else:
             self.native_label.config(text="No records found")
             self.current_record = None
@@ -114,7 +150,11 @@ class App(tk.Tk):
     def save_and_next(self):
         if self.current_record:
             self.current_record.target = self.translation_entry.get()
+            self.current_record.transliteration = self.pronunciation_entry.get()
+            self.current_record.usage_note = self.notes_entry.get("1.0", tk.END)
+            self.current_record.word_type = self.word_type.get()
             self.current_record.save()
+
             self.load_random_record()
 
     def create_demo_rows(self):
